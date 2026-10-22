@@ -21,7 +21,8 @@ license: cc-by-sa-4.0
 language:
 - wo
 task_categories:
-- text2text-generation
+- translation
+- text-generation
 pretty_name: Wolof Spelling Normalization Pairs
 size_categories:
 - 10K<n<100K
