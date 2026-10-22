@@ -12,6 +12,8 @@ Le test (20 % de soynade) est le même que la partie « test » de Lahad/wolof-n
 
 import argparse
 import json
+import sys
+from pathlib import Path
 
 from dataset import hub_split, load_pairs, split
 from metrics import wer
@@ -40,6 +42,13 @@ def main() -> None:
     parser.add_argument("--model", help="dossier ou nom Hugging Face d'un modèle ByT5 fine-tuné")
     parser.add_argument("--data-repo", help="lire le test depuis ce jeu de données Hugging Face")
     args = parser.parse_args()
+
+    if args.model and args.model.startswith(("/", ".")) and not Path(args.model).is_dir():
+        parent = Path(args.model).parent
+        content = sorted(p.name for p in parent.iterdir()) if parent.is_dir() else "dossier absent"
+        sys.exit(f"Modèle introuvable : {args.model}\nContenu de {parent} : {content}\n"
+                 "L'entraînement ne s'est sans doute pas terminé : relancer l'étape d'entraînement "
+                 "(elle reprend au dernier checkpoint).")
 
     if args.data_repo:
         rows = [json.loads(line) for line in hub_split("test", args.data_repo).open(encoding="utf-8")]

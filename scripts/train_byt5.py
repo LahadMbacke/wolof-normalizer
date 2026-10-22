@@ -123,7 +123,11 @@ def main() -> None:
         compute_metrics=compute_metrics,
         callbacks=[EarlyStoppingCallback(early_stopping_patience=4)],
     )
-    trainer.train()
+    # Reprend au dernier checkpoint si une session précédente a été coupée (Colab).
+    resume = any(Path(args.output_dir).glob("checkpoint-*"))
+    if resume:
+        print("Reprise au dernier checkpoint de", args.output_dir)
+    trainer.train(resume_from_checkpoint=resume or None)
     trainer.save_model(Path(args.output_dir) / "best")
     tokenizer.save_pretrained(Path(args.output_dir) / "best")
     print("Meilleur WER dev :", trainer.state.best_metric)
