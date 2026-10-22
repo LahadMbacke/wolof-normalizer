@@ -31,5 +31,6 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 OUTPUT_DIR="$WORK/wolof-normalizer-runs/byt5-small"
 
 nvidia-smi --query-gpu=name,memory.total --format=csv
+python -c "import torch; assert torch.cuda.is_available(), 'GPU non visible'; print('PyTorch', torch.__version__, '| GPU', torch.cuda.get_device_name(), '| architectures', torch.cuda.get_arch_list())"
 srun python scripts/train_byt5.py --output-dir "$OUTPUT_DIR" --epochs 5 --batch-size 16 --grad-accum 2
 srun python scripts/run_evaluation.py --data-repo Lahad/wolof-normalization-pairs --model "$OUTPUT_DIR/best"

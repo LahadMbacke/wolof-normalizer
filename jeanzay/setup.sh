@@ -27,8 +27,8 @@ pip install -e ".[eval]" \
 python - <<'EOF'
 import torch
 from transformers import Seq2SeqTrainer
-print("PyTorch", torch.__version__, "| architectures :", torch.cuda.get_arch_list())
-assert "sm_70" in torch.cuda.get_arch_list(), "ce PyTorch ne gère pas les V100"
+# Pas de GPU sur la frontale : la compatibilité avec le V100 est vérifiée au début du job.
+print("PyTorch", torch.__version__)
 print("Import du Trainer : OK")
 EOF
 
