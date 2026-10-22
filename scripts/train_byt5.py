@@ -1,6 +1,8 @@
 """Fine-tune ByT5 (google/byt5-small) pour normaliser le wolof non standard.
 
-Prévu pour Colab (GPU T4/L4/A100). Lire d'abord data_build/ produit par make_synthetic.py.
+Prévu pour Colab (GPU T4/L4/A100). Les données viennent par défaut du jeu publié sur
+Hugging Face (Lahad/wolof-normalization-pairs) ; --local-data utilise plutôt data_build/
+produit par make_synthetic.py.
 
     python scripts/train_byt5.py --output-dir runs/byt5-small
     python scripts/train_byt5.py --model google/byt5-base --batch-size 8   # plus gros, plus lent
@@ -21,7 +23,7 @@ from transformers import (
 )
 
 from metrics import edit_distance
-from dataset import words
+from dataset import HUB_DATASET, hub_split, words
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data_build"
@@ -47,6 +49,8 @@ class JsonlDataset(torch.utils.data.Dataset):
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default="google/byt5-small")
+    parser.add_argument("--data-repo", default=HUB_DATASET, help="jeu de données Hugging Face")
+    parser.add_argument("--local-data", action="store_true", help="utiliser data_build/ au lieu du Hub")
     parser.add_argument("--output-dir", default=str(ROOT / "runs" / "byt5-small"))
     parser.add_argument("--epochs", type=float, default=5)
     parser.add_argument("--batch-size", type=int, default=16)
@@ -60,8 +64,12 @@ def main() -> None:
 
     tokenizer = AutoTokenizer.from_pretrained(args.model)
     model = AutoModelForSeq2SeqLM.from_pretrained(args.model)
-    train = JsonlDataset(DATA / "train.jsonl", tokenizer, args.max_bytes)
-    dev = JsonlDataset(DATA / "dev.jsonl", tokenizer, args.max_bytes)
+    if args.local_data:
+        train_path, dev_path = DATA / "train.jsonl", DATA / "dev.jsonl"
+    else:
+        train_path, dev_path = hub_split("train", args.data_repo), hub_split("validation", args.data_repo)
+    train = JsonlDataset(train_path, tokenizer, args.max_bytes)
+    dev = JsonlDataset(dev_path, tokenizer, args.max_bytes)
     print(f"train : {len(train)} | dev : {len(dev)}")
 
     def compute_metrics(prediction):

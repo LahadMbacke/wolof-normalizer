@@ -5,11 +5,15 @@ ponctuation ignorée) entre la sortie et la phrase en orthographe officielle.
 
     python scripts/run_evaluation.py                                # lexique + règles
     python scripts/run_evaluation.py --model runs/byt5-small/best   # + modèle ByT5
+
+Le test (20 % de soynade) est le même que la partie « test » de Lahad/wolof-normalization-pairs ;
+--data-repo le lit directement depuis Hugging Face.
 """
 
 import argparse
+import json
 
-from dataset import load_pairs, split
+from dataset import hub_split, load_pairs, split
 from metrics import wer
 
 from wolof_normalizer import normalize
@@ -34,9 +38,14 @@ def generate(model_path: str, sentences: list[str], batch_size: int = 32) -> lis
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", help="dossier ou nom Hugging Face d'un modèle ByT5 fine-tuné")
+    parser.add_argument("--data-repo", help="lire le test depuis ce jeu de données Hugging Face")
     args = parser.parse_args()
 
-    _, test = split(load_pairs())
+    if args.data_repo:
+        rows = [json.loads(line) for line in hub_split("test", args.data_repo).open(encoding="utf-8")]
+        test = [(row["source"], row["target"]) for row in rows]
+    else:
+        _, test = split(load_pairs())
     sources = [s for s, _ in test]
     references = [r for _, r in test]
     lexicon_outputs = [normalize(s) for s in sources]

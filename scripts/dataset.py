@@ -20,6 +20,7 @@ WIKIPEDIA_URL = (
     "https://huggingface.co/datasets/wikimedia/wikipedia"
     "/resolve/main/20231101.wo/train-00000-of-00001.parquet"
 )
+HUB_DATASET = "Lahad/wolof-normalization-pairs"
 CACHE_DIR = Path(__file__).resolve().parent.parent / ".cache"
 CACHE = CACHE_DIR / "wolof_non_standard.parquet"
 
@@ -68,6 +69,13 @@ def load_wikipedia(min_chars: int = 30, max_chars: int = 200) -> list[str]:
             if min_chars <= len(sentence) <= max_chars and not re.search(r"[0-9]{3,}|[|=<>{}\[\]]", sentence):
                 sentences.append(unicodedata.normalize("NFC", sentence))
     return sentences
+
+
+def hub_split(name: str, repo_id: str = HUB_DATASET) -> Path:
+    """Télécharge une partie (train, validation, test) du jeu de données publié sur Hugging Face."""
+    from huggingface_hub import hf_hub_download
+
+    return Path(hf_hub_download(repo_id, f"data/{name}.jsonl", repo_type="dataset"))
 
 
 def split(pairs, train_ratio=0.8):

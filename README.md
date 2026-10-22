@@ -79,9 +79,13 @@ Training data (`scripts/make_synthetic.py`, ~32k pairs, published as [Lahad/wolo
 - standard Wolof sentences from [google/smol](https://huggingface.co/datasets/google/smol) (CC BY 4.0) and [Wolof Wikipedia](https://huggingface.co/datasets/wikimedia/wikipedia) (CC BY-SA 4.0), turned into "SMS-style" Wolof with the mined lexicon used in reverse plus inverse grapheme rules (`x`→`kh`, `u`→`ou`, `ñ`→`gn`, dropped accents and geminates…). Test sentences are excluded from these sources.
 
 ```bash
+# trains on Lahad/wolof-normalization-pairs from the Hugging Face Hub (GPU recommended, see notebook)
+python scripts/train_byt5.py --output-dir runs/byt5-small
+python scripts/run_evaluation.py --data-repo Lahad/wolof-normalization-pairs --model runs/byt5-small/best
+
+# or rebuild the data locally
 python scripts/make_synthetic.py
-python scripts/train_byt5.py --output-dir runs/byt5-small   # GPU recommended (see notebook)
-python scripts/run_evaluation.py --model runs/byt5-small/best
+python scripts/train_byt5.py --local-data --output-dir runs/byt5-small
 ```
 
 ## Contributing
