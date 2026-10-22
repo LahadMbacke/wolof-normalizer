@@ -56,7 +56,8 @@ def main() -> None:
     parser.add_argument("--batch-size", type=int, default=16)
     parser.add_argument("--grad-accum", type=int, default=2)
     parser.add_argument("--lr", type=float, default=5e-4)
-    parser.add_argument("--max-bytes", type=int, default=384)
+    parser.add_argument("--max-bytes", type=int, default=256)
+    parser.add_argument("--gradient-checkpointing", action="store_true", help="moins de mémoire, environ 30 %% plus lent")
     parser.add_argument("--eval-steps", type=int, default=500)
     parser.add_argument("--max-steps", type=int, default=-1, help="pour un test rapide")
     parser.add_argument("--push-to-hub", default=None, help="ex. Lahad/wolof-normalizer-byt5-small")
@@ -97,6 +98,9 @@ def main() -> None:
         lr_scheduler_type="linear",
         warmup_steps=int(0.05 * total_steps),
         optim="adafactor",
+        # Lots de phrases de longueur proche : moins de padding, donc moins de mémoire et plus rapide.
+        train_sampling_strategy="group_by_length",
+        gradient_checkpointing=args.gradient_checkpointing,
         bf16=use_bf16,
         eval_strategy="steps",
         eval_steps=args.eval_steps,
