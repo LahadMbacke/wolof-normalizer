@@ -3,6 +3,7 @@
 Les données sont téléchargées dans .cache/ (non versionné) et ne sont pas redistribuées ici.
 """
 
+import json
 import re
 import unicodedata
 import urllib.request
@@ -14,10 +15,7 @@ URL = (
     "https://huggingface.co/datasets/soynade-research/Wolof-Non-Standard-Orthography"
     "/resolve/main/data/train-00000-of-00001.parquet"
 )
-GALSENAI_URL = (
-    "https://huggingface.co/datasets/galsenai/english-wolof-smol-translation"
-    "/resolve/main/data/train-00000-of-00001.parquet"
-)
+SMOL_URL = "https://huggingface.co/datasets/google/smol/resolve/main/{}/en_wo.jsonl"
 WIKIPEDIA_URL = (
     "https://huggingface.co/datasets/wikimedia/wikipedia"
     "/resolve/main/20231101.wo/train-00000-of-00001.parquet"
@@ -49,10 +47,15 @@ def load_pairs() -> list[tuple[str, str]]:
     return [(_clean(r["non_standardized"]), _clean(r["wo"])) for r in rows]
 
 
-def load_galsenai() -> list[str]:
-    """Phrases wolof standard de galsenai/english-wolof-smol-translation."""
-    path = _download(GALSENAI_URL, CACHE_DIR / "galsenai_smol.parquet")
-    return [_clean(r["wo"]) for r in pq.read_table(path, columns=["wo"]).to_pylist() if r["wo"]]
+def load_smol() -> list[str]:
+    """Phrases wolof standard de google/smol (CC BY 4.0) : SmolSent, SmolDoc et GATITOS."""
+    sentences = []
+    for subset in ["smolsent", "smoldoc", "gatitos"]:
+        path = _download(SMOL_URL.format(subset), CACHE_DIR / f"smol_{subset}_en_wo.jsonl")
+        for line in path.open(encoding="utf-8"):
+            row = json.loads(line)
+            sentences += [row["trg"]] if "trg" in row else row["trgs"]
+    return [_clean(s) for s in dict.fromkeys(sentences) if s.strip()]
 
 
 def load_wikipedia(min_chars: int = 30, max_chars: int = 200) -> list[str]:

@@ -3,13 +3,13 @@
 Sources :
 - soynade-research/Wolof-Non-Standard-Orthography : vraies paires (80 % train, dont 200 en dev ;
   les 20 % restants forment le test, jamais vus à l'entraînement) ;
-- galsenai/english-wolof-smol-translation et Wikipédia en wolof : phrases standard, auxquelles
+- google/smol (CC BY 4.0) et Wikipédia en wolof (CC BY-SA 4.0) : phrases standard, auxquelles
   on ajoute un bruit « écriture SMS » (lexique extrait utilisé à l'envers + règles graphiques).
   Les phrases du test sont exclues de ces sources.
 
 Écrit data_build/{train,dev,test}.jsonl, une paire {"source", "target", "origin"} par ligne.
 
-    python scripts/make_synthetic.py [--galsenai-copies 2] [--wiki-copies 1] [--seed 0]
+    python scripts/make_synthetic.py [--smol-copies 2] [--wiki-copies 1] [--seed 0]
 """
 
 import argparse
@@ -19,7 +19,7 @@ import re
 from collections import defaultdict
 from pathlib import Path
 
-from dataset import load_galsenai, load_pairs, load_wikipedia, split, words
+from dataset import load_pairs, load_smol, load_wikipedia, split, words
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "src" / "wolof_normalizer" / "data"
@@ -119,7 +119,7 @@ def write_jsonl(path: Path, rows) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--galsenai-copies", type=int, default=2)
+    parser.add_argument("--smol-copies", type=int, default=2)
     parser.add_argument("--wiki-copies", type=int, default=1)
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
@@ -133,7 +133,7 @@ def main() -> None:
     train = [{"source": s, "target": t, "origin": "soynade"} for s, t in train_pairs]
     seen = {(row["source"], row["target"]) for row in train}
 
-    sources = [("galsenai", load_galsenai(), args.galsenai_copies),
+    sources = [("smol", load_smol(), args.smol_copies),
                ("wikipedia", load_wikipedia(), args.wiki_copies)]
     for origin, sentences, copies in sources:
         for sentence in sentences:
