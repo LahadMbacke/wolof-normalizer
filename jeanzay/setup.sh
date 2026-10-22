@@ -17,6 +17,8 @@ source "$VENV/bin/activate"
 pip install --upgrade pip
 pip install -e ".[eval]" "transformers==5.20.2" accelerate datasets
 
+python -c "import torch, sys; v = tuple(map(int, torch.__version__.split('+')[0].split('.')[:2])); print('PyTorch', torch.__version__); sys.exit(0 if v >= (2, 6) else 'PyTorch >= 2.6 requis par transformers 5 : choisir un module plus récent (voir jeanzay/env.sh)')"
+
 # Pré-téléchargement du modèle de base et du jeu de données
 python - <<'EOF'
 from huggingface_hub import snapshot_download
