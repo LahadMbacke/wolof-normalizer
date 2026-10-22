@@ -11,3 +11,5 @@ dist/
 candidates.tsv
 data_build/
 runs/
+jeanzay/
+logs/
