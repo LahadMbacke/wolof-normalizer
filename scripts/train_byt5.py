@@ -85,8 +85,9 @@ def main() -> None:
     steps_per_epoch = -(-len(train) // (args.batch_size * args.grad_accum))
     total_steps = args.max_steps if args.max_steps > 0 else int(steps_per_epoch * args.epochs)
 
-    # T5 est instable en fp16 : bf16 si le GPU le permet (L4, A100), sinon fp32 (T4).
-    use_bf16 = torch.cuda.is_available() and torch.cuda.is_bf16_supported()
+    # T5 est instable en fp16 : bf16 sur les GPU qui le gèrent nativement (A100, H100, L4),
+    # sinon fp32 (T4, V100, où bf16 ne serait qu'émulé, donc lent).
+    use_bf16 = torch.cuda.is_available() and torch.cuda.get_device_capability()[0] >= 8
     training_args = Seq2SeqTrainingArguments(
         output_dir=args.output_dir,
         num_train_epochs=args.epochs,

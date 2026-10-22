@@ -4,17 +4,17 @@
 #   squeue -u $USER                       # suivre le job
 #   tail -f logs/byt5-wolof-<jobid>.out    # suivre l'entraînement
 #
-# Remplacer <projet> par ton identifiant de projet (commande `idracct`).
-# Partition A100 ci-dessous ; pour V100 : -A <projet>@v100 et -C v100-32g ; pour H100 : -A <projet>@h100 et -C h100.
+# Projet hcg, partition V100 32 Go. Pour A100 : sbatch -A hcg@a100 -C a100 jeanzay/train.slurm
+# (et --batch-size 32 --grad-accum 1 plus bas).
 #SBATCH --job-name=byt5-wolof
-#SBATCH --account=<projet>@a100
-#SBATCH --constraint=a100
+#SBATCH --account=hcg@v100
+#SBATCH --constraint=v100-32g
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --gres=gpu:1
-#SBATCH --cpus-per-task=8
+#SBATCH --cpus-per-task=10
 #SBATCH --hint=nomultithread
-#SBATCH --time=04:00:00
+#SBATCH --time=08:00:00
 #SBATCH --output=logs/%x-%j.out
 #SBATCH --error=logs/%x-%j.out
 
@@ -31,5 +31,5 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 OUTPUT_DIR="$WORK/wolof-normalizer-runs/byt5-small"
 
 nvidia-smi --query-gpu=name,memory.total --format=csv
-srun python scripts/train_byt5.py --output-dir "$OUTPUT_DIR" --epochs 5 --batch-size 32 --grad-accum 1
+srun python scripts/train_byt5.py --output-dir "$OUTPUT_DIR" --epochs 5 --batch-size 16 --grad-accum 2
 srun python scripts/run_evaluation.py --data-repo Lahad/wolof-normalization-pairs --model "$OUTPUT_DIR/best"
