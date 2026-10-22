@@ -47,10 +47,15 @@ def test_case_and_punctuation_are_preserved():
 
 
 def test_changes_are_reported():
-    _, changes = normalize_with_changes("kham nga ko ?")
-    assert [(c.original, c.normalized, c.reason) for c in changes] == [("kham", "xam", "rules")]
+    _, changes = normalize_with_changes("khale nga ko ?")
+    assert [(c.original, c.normalized, c.reason) for c in changes] == [("khale", "xale", "rules")]
 
 
 def test_cli(capsys):
     assert main(["nanga", "def"]) == 0
     assert capsys.readouterr().out == "na nga def\n"
+
+
+def test_hand_lexicon_overrides_mined_lexicon():
+    # le lexique extrait propose « ñaw », le lexique écrit à la main « ñaaw »
+    assert normalize("gnaw") == "ñaaw"

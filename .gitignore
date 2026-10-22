@@ -7,3 +7,5 @@ venv/
 build/
 dist/
 .env
+.cache/
+candidates.tsv

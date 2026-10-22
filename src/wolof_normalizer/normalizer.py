@@ -46,14 +46,15 @@ def _load_tsv(name: str) -> dict[str, str]:
     for line in text.splitlines():
         if not line.strip() or line.startswith("#"):
             continue
-        variant, official = line.split("\t")
+        variant, official = line.split("\t")[:2]
         entries[variant.strip().lower()] = official.strip()
     return entries
 
 
 @lru_cache(maxsize=1)
 def _lexicon() -> dict[str, str]:
-    return _load_tsv("lexicon.tsv")
+    # Le lexique écrit à la main est prioritaire sur le lexique extrait automatiquement.
+    return {**_load_tsv("lexicon_mined.tsv"), **_load_tsv("lexicon.tsv")}
 
 
 @lru_cache(maxsize=1)
