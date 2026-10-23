@@ -16,14 +16,15 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("text", nargs="*", help="texte à normaliser (sinon lu sur l'entrée standard)")
     parser.add_argument("-v", "--verbose", action="store_true", help="affiche les modifications faites")
-    parser.add_argument("-m", "--model", nargs="?", const=DEFAULT_MODEL, default=None,
-                        help=f"utilise le modèle neuronal (par défaut {DEFAULT_MODEL})")
+    parser.add_argument("-m", "--model", action="store_true", help="utilise le modèle neuronal ByT5")
+    parser.add_argument("--model-name", default=DEFAULT_MODEL,
+                        help=f"modèle Hugging Face ou dossier local (par défaut {DEFAULT_MODEL})")
     args = parser.parse_args(argv)
 
     lines = [" ".join(args.text)] if args.text else sys.stdin.read().splitlines()
     if args.model:
         try:
-            normalizer = ModelNormalizer(args.model)
+            normalizer = ModelNormalizer(args.model_name)
         except ImportError as error:
             parser.exit(1, f"{error}\n")
         for normalized in normalizer.normalize_batch(lines):
