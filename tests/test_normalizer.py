@@ -59,3 +59,16 @@ def test_cli(capsys):
 def test_hand_lexicon_overrides_mined_lexicon():
     # le lexique extrait propose « ñaw », le lexique écrit à la main « ñaaw »
     assert normalize("gnaw") == "ñaaw"
+
+
+def test_cli_model_without_extra_dependencies(monkeypatch, capsys):
+    import wolof_normalizer.cli as cli
+
+    def missing(*args, **kwargs):
+        raise ImportError('pip install "wolof-normalizer[model]"')
+
+    monkeypatch.setattr(cli, "ModelNormalizer", missing)
+    with pytest.raises(SystemExit) as exit_info:
+        main(["--model", "khale"])
+    assert exit_info.value.code == 1
+    assert "wolof-normalizer[model]" in capsys.readouterr().err

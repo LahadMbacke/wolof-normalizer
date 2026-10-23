@@ -14,9 +14,9 @@ Most Wolof online (social media, messaging) is written with French spelling habi
 For each word, from safest to least safe:
 
 1. **Lexicon** of known variants, including multi-word expressions (`nanga def` → `na nga def`):
-   - [`data/lexicon.tsv`](src/wolof_normalizer/data/lexicon.tsv): hand-written, takes priority;
-   - [`data/lexicon_mined.tsv`](src/wolof_normalizer/data/lexicon_mined.tsv): ~930 variants mined automatically from a parallel corpus (see [Evaluation](#evaluation)).
-2. Words already in the **official vocabulary** ([`data/vocab.txt`](src/wolof_normalizer/data/vocab.txt)) are kept.
+   - [`data/lexicon.tsv`](https://github.com/LahadMbacke/wolof-normalizer/blob/main/src/wolof_normalizer/data/lexicon.tsv): hand-written, takes priority;
+   - [`data/lexicon_mined.tsv`](https://github.com/LahadMbacke/wolof-normalizer/blob/main/src/wolof_normalizer/data/lexicon_mined.tsv): ~930 variants mined automatically from a parallel corpus (see [Evaluation](#evaluation)).
+2. Words already in the **official vocabulary** ([`data/vocab.txt`](https://github.com/LahadMbacke/wolof-normalizer/blob/main/src/wolof_normalizer/data/vocab.txt)) are kept.
 3. **Grapheme rules** (`tch`→`c`, `kh`→`x`, `ch`→`c`, `dj`→`j`, `gn`/`ny`→`ñ`, `ou`→`u`, `eu`→`ë`, `di`+vowel→`j`, final consonant gemination). A rule-based correction is applied **only if the result exists in the vocabulary**, to avoid breaking names and French words.
 4. Otherwise the word is left unchanged.
 
@@ -25,7 +25,8 @@ Case and punctuation are preserved.
 ## Install & use
 
 ```bash
-pip install -e ".[dev]"
+pip install wolof-normalizer            # lexicon + rules (lightweight)
+pip install "wolof-normalizer[model]"   # + neural model (PyTorch, ~1.2 GB download on first use)
 ```
 
 ```python
@@ -36,12 +37,25 @@ normalize_with_changes("kham nga ko ?")
 # ('xam nga ko ?', [Change(original='kham', normalized='xam', reason='rules')])
 ```
 
+Neural model (more accurate, slower):
+
+```python
+from wolof_normalizer import ModelNormalizer
+
+normalizer = ModelNormalizer()   # downloads Lahad/wolof-normalizer-byt5-small
+normalizer.normalize("gnou bari dagnou meuna dem keur gui souba")
+# 'Ñu bari dañu mëna dem kër gi suba.'
+```
+
 Command line:
 
 ```bash
 wolof-normalize "khale yi"            # xale yi
 cat messages.txt | wolof-normalize -v # -v prints each change on stderr
+wolof-normalize --model "khale yi dagnou beugue fo"   # neural model
 ```
+
+From source: `pip install -e ".[dev]"`.
 
 ## Tests
 
