@@ -43,6 +43,16 @@ model-index:
 
 Normalizes **non-standard Wolof** (French-style / SMS spelling: `kh` for `x`, `ou` for `u`, `gn` for `ñ`, missing accents…) into the **official orthography** (CLAD alphabet).
 
+| Input | Model output |
+|---|---|
+| dafa beug wakh ak yaw thi kanam | Dafa bëgg wax ak yaw ci kanam. |
+| gnou bari dagnou meuna dem keur gui souba | Ñu bari dañu mëna dem kër gi suba. |
+| khale yi dagnou beugue fo | Xale yi dañu bëgg fo. |
+| Nanga def ? Mangui fi rek, dieuredieuf | Nanga def ? Maa ngi fi rek, jërëjëf |
+| Ousmane dem na Paris ak sa yaye | Usmane dem na Paris ak sa yaay. |
+
+Known limitations, visible above: some frequent fixed expressions are left unchanged (`nanga def` instead of `na nga def`, `rek` instead of `rekk`), proper nouns may be "Wolofized" (`Ousmane` → `Usmane`), and the model tends to add a final period.
+
 ## Usage
 
 ```python
